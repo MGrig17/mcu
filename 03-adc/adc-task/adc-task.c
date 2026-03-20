@@ -11,11 +11,11 @@
 #define ADC_CHANNEL 0
 #define ADC_TEMPERATURE 4 // константа номером канала АЦП, подключенного к датчику температуры
 
-// #define ADC_TASK_MEAS_PERIOD_US 100000 
+#define ADC_TASK_MEAS_PERIOD_US 100000 
 
-// uint64_t adc_ts;
+uint64_t adc_ts;
 // adc_state_t adc_state;
-
+adc_task_state_t adc_state;
 
 void adc_task_init(void) { // Создать имплементацию функции инициализации в adc-task.c, содержащую следующие действия:
     // инициализировать периферийный модуль АЦП:
@@ -23,8 +23,8 @@ void adc_task_init(void) { // Создать имплементацию функ
     // инициализировать GPIO вывод на работу с АЦП:
     adc_gpio_init(ADC_PIN);
     adc_set_temp_sensor_enabled(true); //  включение встроенного датчика температуры
-    // adc_ts = 0;
-    // adc_state = ADC_TASK_STATE_RUN;
+    adc_ts = 0;
+    adc_state = ADC_TASK_STATE_IDLE;
 }
 
 float adc_task_voltage(void){
@@ -42,23 +42,23 @@ float adc_task_temperature(void){
     return temp_C;
 }
 
-// void adc_task_set_state(adc_state_t state){
-//     adc_state = state;
-// }
+void adc_task_set_state(adc_task_state_t state){
+    adc_state = state;
+}
 
-// void adc_task_handle() {
-//     switch(adc_state)
-//     {
-//     case ADC_TASK_STATE_RUN:
-//         if (time_us_64() > adc_ts + ADC_TASK_MEAS_PERIOD_US) {
-//             float temp_C = adc_task_temperature();
-//             float voltage_V = adc_task_voltage();
-//             adc_ts = time_us_64();
-//             printf("%f %f\n", voltage_V, temp_C);
+void adc_task_handle() {
+    switch(adc_state)
+    {
+    case ADC_TASK_STATE_RUN:
+        if (time_us_64() > adc_ts + ADC_TASK_MEAS_PERIOD_US) {
+            float temp_C = adc_task_temperature();
+            float voltage_V = adc_task_voltage();
+            adc_ts = time_us_64();
+            printf("%f %f\n", voltage_V, temp_C);
             
-//         }
-//         break;
-//     default:
-// 	    break;
-//     }
-// }
+        }
+        break;
+    default:
+	    break;
+    }
+}

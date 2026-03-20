@@ -27,6 +27,8 @@ void led_blink_set_period_ms_callback(const char* args);
 void help_callback(const char* args);
 void get_adc_callback(const char* args);
 void get_temp_callback(const char* args);
+void tm_start_callback(const char* args);
+void tm_stop_callback(const char* args);
 
 
 // в main.c создать массив команд с одной командой version, указателем на колбэк этой команды и с описанием:
@@ -42,8 +44,8 @@ api_t device_api[] =
     {"help", help_callback, "print help"},
     {"get_adc", get_adc_callback, "print voltage"},
     {"get_temp", get_temp_callback, "print temperature in C"},
-    // {"tm_start", tm_start_callback, "start measures"}, //  <=> restore adc-task into RUN
-    // {"tm_stop", tm_stop_callback, "stop measures"},
+    {"tm_start", tm_start_callback, "start measures"}, //  <=> restore adc-task into RUN
+    {"tm_stop", tm_stop_callback, "stop measures"},
 	{NULL, NULL, NULL},
 };
 
@@ -83,14 +85,16 @@ void get_temp_callback(const char* args) {
     float temp_C = adc_task_temperature();
     printf("%f\n", temp_C);
 }
-// void tm_start_callback(const char* args) {
-//     adc_state = ADC_TASK_STATE_RUN;
-//     printf("ADC measurements started\n");
-// }
-// void tm_stop_callback(const char* args) {
-//     adc_state = ADC_TASK_STATE_IDLE;
-//     printf("ADC measurements stopped\n");
-// }
+void tm_start_callback(const char* args) {
+    // adc_state = ADC_TASK_STATE_RUN;
+    adc_task_set_state(ADC_TASK_STATE_RUN);
+    printf("ADC measurements started\n");
+}
+void tm_stop_callback(const char* args) {
+    // adc_state = ADC_TASK_STATE_IDLE;
+    adc_task_set_state(ADC_TASK_STATE_IDLE);
+    printf("ADC measurements stopped\n");
+}
 
 int main() {
     // -- В теле main() инициализировать систему ввода/вывода stdio следующей строчкой:
@@ -106,6 +110,7 @@ int main() {
         char *cmd = stdio_task_handle();
         protocol_task_handle(cmd);
         led_task_handle();
+        adc_task_handle();
 
     }
 }
